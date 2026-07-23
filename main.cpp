@@ -1,163 +1,157 @@
-#include"header.h"
 class bank
 {
-	int accountnumber;
-	char name[20];
-	float balance;
-	int withdrawamount;
-	int depositamt;
+    int accountnumber;
+    char name[20];
+    int balance;
 
-	public:
+public:
+    void create()
+    {
+        ofstream out("bank.txt", ios::app);
 
-	void create_account()
-	{
-		ofstream out;
+        cout << "Enter Account Number, Name and Balance: ";
+        cin >> accountnumber >> name >> balance;
 
-		cout<<"Enter account number, name and balance"<<endl;
+        out << accountnumber << " " << name << " " << balance << endl;
 
-		cin>>accountnumber>>name>>balance;
+        out.close();
+        cout << "Account Created Successfully.\n";
+    }
 
-		out.open("bank1.txt",ios::app|ios::out);
+    void displayaccount()
+    {
+        ifstream in("bank.txt");
 
-		out<<accountnumber<<" "
-		   <<name<<" "
-		   <<balance<<endl;
+        cout << "\nAccount Details\n";
 
-		out.close();
+        while (in >> accountnumber >> name >> balance)
+        {
+            cout << "Account Number : " << accountnumber << endl;
+            cout << "Name           : " << name << endl;
+            cout << "Balance        : " << balance << endl;
+            cout << "------------------------" << endl;
+        }
 
-		cout<<"Account created successfully"<<endl;
-	}
+        in.close();
+    }
 
-	void deposit()
-	{
-		cout<<"Enter amount to deposit"<<endl;
+    void deposit()
+    {
+        int acc, amount;
+        bool found = false;
 
-		cin>>depositamt;
+        cout << "Enter Account Number: ";
+        cin >> acc;
 
-		balance=balance+depositamt;
+        cout << "Enter Amount to Deposit: ";
+        cin >> amount;
 
-		cout<<"Updated balance:"<<balance<<endl;
-	}
+        ifstream in("bank.txt");
+        ofstream out("temp.txt");
 
-	void withdraw()
-	{
-		cout<<"Enter withdrawal amount"<<endl;
+        while (in >> accountnumber >> name >> balance)
+        {
+            if (accountnumber == acc)
+            {
+                balance += amount;
+                found = true;
+            }
 
-		cin>>withdrawamount;
+            out << accountnumber << " " << name << " " << balance << endl;
+        }
 
-		if(withdrawamount>0)
-		{
-			if(withdrawamount<=balance)
-			{
-				balance=balance-withdrawamount;
+        in.close();
+        out.close();
 
-				cout<<"Withdrawal successful"<<endl;
-			}
-			else
-			{
-				cout<<"Insufficient balance"<<endl;
-			}
-		}
-		else
-		{
-			cout<<"Invalid amount"<<endl;
-		}
+        remove("bank.txt");
+        rename("temp.txt", "bank.txt");
 
-		cout<<"Remaining balance:"<<balance<<endl;
-	}
+        if (found)
+            cout << "Amount Deposited Successfully.\n";
+        else
+            cout << "Account Not Found.\n";
+    }
 
-	void display()
-	{
-		ifstream in;
+    void withdraw()
+    {
+        int acc, amount;
+        bool found = false;
 
-		in.open("bank.txt",ios::in);
+        cout << "Enter Account Number: ";
+        cin >> acc;
 
-		if(!in)
-		{
-			cout<<"File not found"<<endl;
-			return;
-		}
+        cout << "Enter Amount to Withdraw: ";
+        cin >> amount;
 
-		cout<<"\nAccount Details\n"<<endl;
+        ifstream in("bank.txt");
+        ofstream out("temp.txt");
 
-		while(in>>accountnumber>>name>>balance)
-		{
-			cout<<"Account Number : "<<accountnumber<<endl;
+        while (in >> accountnumber >> name >> balance)
+        {
+            if (accountnumber == acc)
+            {
+                found = true;
 
-			cout<<"Name           : "<<name<<endl;
+                if (amount <= balance)
+                    balance -= amount;
+                else
+                    cout << "Insufficient Balance.\n";
+            }
 
-			cout<<"Balance        : "<<balance<<endl;
+            out << accountnumber << " " << name << " " << balance << endl;
+        }
 
-			cout<<"-----------------------------"<<endl;
-		}
+        in.close();
+        out.close();
 
-		in.close();
-	}
+        remove("bank.txt");
+        rename("temp.txt", "bank.txt");
+
+        if (!found)
+            cout << "Account Not Found.\n";
+    }
 };
 
 int main()
 {
-	bank b[20];
+    bank b;
+    int op;
 
-	int i,op;
+    while (1)
+    {
+        cout << "\n1. Create Account";
+        cout << "\n2. Deposit";
+        cout << "\n3. Withdraw";
+        cout << "\n4. Display Accounts";
+        cout << "\n5. Exit";
+        cout << "\nEnter your choice: ";
+        cin >> op;
 
-	while(1)
-	{
-		cout<<"\n===== BANK MENU ====="<<endl;
+        switch (op)
+        {
+        case 1:
+            b.create();
+            break;
 
-		cout<<"1. Create Account"<<endl;
+        case 2:
+            b.deposit();
+            break;
 
-		cout<<"2. Deposit"<<endl;
+        case 3:
+            b.withdraw();
+            break;
 
-		cout<<"3. Withdraw"<<endl;
+        case 4:
+            b.displayaccount();
+            break;
 
-		cout<<"4. Display Accounts"<<endl;
+        case 5:
+            return 0;
 
-		cout<<"5. Exit"<<endl;
+        default:
+            cout << "Invalid Choice.\n";
+        }
+    }
 
-		cout<<"Enter your choice:"<<endl;
-
-		cin>>op;
-
-		if(op!=5 && op!=4)
-		{
-			cout<<"Enter account index (0-19):"<<endl;
-
-			cin>>i;
-
-			if(i<0 || i>=20)
-			{
-				cout<<"Invalid index"<<endl;
-
-				continue;
-			}
-		}
-
-		switch(op)
-		{
-			case 1:
-				b[i].create_account();
-				break;
-
-			case 2:
-				b[i].deposit();
-				break;
-
-			case 3:
-				b[i].withdraw();
-				break;
-
-			case 4:
-				b[0].display();
-				break;
-
-			case 5:
-				exit(0);
-
-			default:
-				cout<<"Invalid choice"<<endl;
-		}
-	}
-
-	return 0;
+    return 0;
 }
